@@ -1,0 +1,23 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+draw-app/node_modules
+draw-app/.pnp
+draw-app/.pnp.js
+
+# testing
+draw-app/coverage
+
+# production
+draw-app/build
+
+# misc
+draw-app/.DS_Store
+draw-app/.env.local
+draw-app/.env.development.local
+draw-app/.env.test.local
+draw-app/.env.production.local
+
+draw-app/npm-debug.log*
+draw-app/yarn-debug.log*
+draw-app/yarn-error.log*
