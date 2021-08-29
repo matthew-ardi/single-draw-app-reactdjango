@@ -17,7 +17,7 @@ import django_heroku
 import dotenv
 import dj_database_url
 
-django_heroku.settings(locals())
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -157,6 +157,6 @@ except ImportError:
 # CORS_ORIGIN_WHITELIST = [
 #      'http://localhost:3000'
 # ]
-
+django_heroku.settings(locals())
 options = DATABASES['default'].get('OPTIONS', {})
 options.pop('sslmode', None)
