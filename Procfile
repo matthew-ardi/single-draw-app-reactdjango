@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn drawApp.wsgi --log-file -
+web: gunicorn drawAppBackend.wsgi --log-file -
