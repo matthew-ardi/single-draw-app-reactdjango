@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-3xxkpcw%ye&vo_zlzvsmork$_9k%t6%cz^tna#*u&fd2ck$yhc
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'drawing-app-dev2.herokuapp.com',
+    'drawing-app-dev3-backend.herokuapp.com',
     '127.0.0.1:8000',
     '128.0.0.1:3000'
 ]
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'drawApp'
+    'drawApp',
 ]
 
 MIDDLEWARE = [
