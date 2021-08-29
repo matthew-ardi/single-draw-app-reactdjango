@@ -92,12 +92,12 @@ WSGI_APPLICATION = 'drawAppBackend.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-DATABASES['default]'] = dj_database_url.config(conn_max_age=600)
+# DATABASES['default]'] = dj_database_url.config(conn_max_age=600)
 
 
 # Password validation
@@ -150,13 +150,14 @@ STATICFILES_DIRS = [
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
+
 # CORS_ORIGIN_WHITELIST = [
 #      'http://localhost:3000'
 # ]
 django_heroku.settings(locals())
 options = DATABASES['default'].get('OPTIONS', {})
 options.pop('sslmode', None)
+try:
+    from .local_settings import *
+except ImportError:
+    pass
