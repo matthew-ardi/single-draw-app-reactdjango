@@ -127,29 +127,32 @@ const App = () => {
     console.log(getSaved);
   }
 
-  function openDrawing(event) {
+  function openDrawing(saveId) {
     //open drawing
     clearElements();
-    const retrievedElement = savedElements.find(
-      (savedElements) => savedElements[0] == event.target.value
-    );
-    // console.log(retrievedElement[2]);
-    const saveId = retrievedElement[0];
+    // const saveId = event.currentTarget.getAttribute("value");
     console.log(saveId);
+    const retrievedElement = savedElements.find(
+      (element) => element[0] === saveId
+    );
+    console.log(retrievedElement);
+    // const saveId = retrievedElement[0];
+    // const saveId = event.target.value;
+    // console.log(saveId);
     setElements(retrievedElement[2]);
     setSelectedElement(null);
     setEditDrawing(saveId);
   }
   const savedItems = savedElements.map((item, index) => (
     <div>
-      <li key={index}>{item[1]}</li>
+      <li>{item[1]}</li>
       <Button
         variant="contained"
         color="primary"
         type="Button"
-        id="open"
+        id={index}
         value={item[0]}
-        onClick={openDrawing}
+        onClick={openDrawing.bind(this, item[0])}
       >
         Open
       </Button>
