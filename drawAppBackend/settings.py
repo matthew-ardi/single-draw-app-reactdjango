@@ -14,11 +14,15 @@ from pathlib import Path
 from django.conf import settings
 import os
 import django_heroku
+import dotenv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+dotenv_file = os.path.join(BASE_DIR, ".env")
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -28,10 +32,10 @@ SECRET_KEY = 'django-insecure-3xxkpcw%ye&vo_zlzvsmork$_9k%t6%cz^tna#*u&fd2ck$yhc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'drawing-app-dev3-backend.herokuapp.com',
-    '127.0.0.1:8000',
-    '128.0.0.1:3000'
+ALLOWED_HOSTS = ['*'
+    # 'drawing-app-dev3-backend.herokuapp.com',
+    # '127.0.0.1:8000',
+    # '128.0.0.1:3000'
 ]
 
 
@@ -86,11 +90,12 @@ WSGI_APPLICATION = 'drawAppBackend.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
+DATABASES['default]'] = dj_database_url.config(conn_max_age=600)
 
 
 # Password validation
@@ -138,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'draw-app/build/static')
+    os.path.join(BASE_DIR, 'build/static')
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -147,6 +152,9 @@ try:
     from .local_settings import *
 except ImportError:
     pass
-CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
-]
+# CORS_ORIGIN_WHITELIST = [
+#      'http://localhost:3000'
+# ]
+
+options = DATABASES['default'].get('OPTIONS', {})
+options.pop('sslmode', None)
