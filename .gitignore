@@ -9,7 +9,7 @@ draw-app/.pnp.js
 draw-app/coverage
 
 # production
-draw-app/build
+# draw-app/build
 
 # misc
 draw-app/.DS_Store
