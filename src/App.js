@@ -726,7 +726,6 @@ const App = () => {
                   To save your drawings, please Log in to your account
                 </DialogContentText>
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="name"
                   label="Email Address"
@@ -734,7 +733,6 @@ const App = () => {
                   fullWidth
                 />
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="password"
                   label="Password"
@@ -759,13 +757,12 @@ const App = () => {
               onClose={signupClickClose}
               aria-labelledby="form-dialog-title"
             >
-              <DialogTitle id="form-dialog-title">Login</DialogTitle>
+              <DialogTitle id="form-dialog-title">Register</DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   To save your drawings, please create an account
                 </DialogContentText>
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="name"
                   label="Email Address"
@@ -773,7 +770,6 @@ const App = () => {
                   fullWidth
                 />
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="password"
                   label="Password"
@@ -781,7 +777,6 @@ const App = () => {
                   fullWidth
                 />
                 <TextField
-                  autoFocus
                   margin="dense"
                   id="confirm password"
                   label="Confirm Password"
