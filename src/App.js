@@ -13,6 +13,26 @@ import MenuIcon from "@material-ui/icons/Menu";
 import Modal from "@material-ui/core/Modal";
 import Backdrop from "@material-ui/core/Backdrop";
 import Fade from "@material-ui/core/Fade";
+import Paper from "@material-ui/core/Paper";
+import Grid from "@material-ui/core/Grid";
+import BottomNavigation from "@material-ui/core/BottomNavigation";
+import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
+import RestoreIcon from "@material-ui/icons/Restore";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import LocationOnIcon from "@material-ui/icons/LocationOn";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
+import EditIcon from "@material-ui/icons/Edit";
+import NavigationIcon from "@material-ui/icons/Navigation";
+import TextField from "@material-ui/core/TextField";
+import PropTypes from "prop-types";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -20,6 +40,17 @@ axios.defaults.xsrfHeaderName = "X-CSRFToken";
 // STYLES CODE BELOW
 
 // Modal Styles
+
+const paperStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(2),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+  },
+}));
 
 const modalUseStyles = makeStyles((theme) => ({
   modal: {
@@ -31,7 +62,16 @@ const modalUseStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
     boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+    padding: theme.spacing(15, 20, 18),
+  },
+}));
+
+// const StyledCanvas = styled.canvas((flex - grow: 1));
+const canvasUseStyles = makeStyles((theme) => ({
+  canvasRoot: {
+    height: "100%",
+    width: "100%",
+    position: "relative",
   },
 }));
 
@@ -46,6 +86,42 @@ const navbarUseStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  drawing: {
+    flexGrow: 1,
+  },
+  customizeToolbar: {
+    minHeight: 50,
+  },
+}));
+
+const navigationUseStyles = makeStyles({
+  root: {
+    width: 500,
+  },
+});
+
+const textFieldUseStyles = makeStyles((theme) => ({
+  formField: {
+    "& > *": {
+      margin: theme.spacing(1),
+      width: "25",
+    },
+    input: {
+      color: "white",
+    },
+  },
+}));
+
+const loginFormUseStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flexWrap: "wrap",
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: "25ch",
+  },
 }));
 
 // STYLES CODE ABOVE
@@ -55,7 +131,7 @@ const navbarUseStyles = makeStyles((theme) => ({
 const generator = rough.generator();
 
 function createElement(id, x1, y1, x2, y2, tool, color) {
-  const roughElement = generator.rectangle(x1, y1, x2 - x1, y2 - y1, {
+  const roughElement = generator.rectangle(x1, y1 - 80, x2 - x1, y2 - y1, {
     fill: color,
   });
   return { id, x1, y1, x2, y2, tool, roughElement };
@@ -168,17 +244,46 @@ const App = () => {
 
   // navbar
   const navbarClasses = navbarUseStyles();
+  const navigationClasses = navigationUseStyles();
+  const [value, setValue] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null); //Simple Menu
+  // Simple Menu
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   // modal
   const modalClasses = modalUseStyles();
-  const [open, setOpen] = React.useState(false);
 
-  const handleOpen = () => {
-    setOpen(true);
+  // canvas
+  const paperClasses = paperStyles();
+  const canvasClasses = canvasUseStyles();
+
+  // text field
+  const textFieldClasses = textFieldUseStyles();
+
+  // Login or Sign up
+  const loginFormClasses = loginFormUseStyles();
+  const [openLogin, setOpenLogin] = React.useState(false);
+  const [openSignup, setOpenSignup] = React.useState(false);
+  const loginClickOpen = () => {
+    setOpenLogin(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const loginClickClose = () => {
+    setOpenLogin(false);
+  };
+
+  const signupClickOpen = () => {
+    setOpenSignup(true);
+  };
+
+  const signupClickClose = () => {
+    setOpenSignup(false);
   };
 
   // UI RELATED ABOVE
@@ -207,6 +312,16 @@ const App = () => {
     setSelectedElement(null);
     setEditDrawing(saveId);
   }
+
+  function onClickOpenDrawing(saveId) {
+    handleMenuClose();
+    openDrawing(saveId);
+  }
+  const savedItemsMenu = savedElements.map((item, index) => (
+    <MenuItem onClick={onClickOpenDrawing.bind(this, item[0])} value={item[0]}>
+      {item[1]}
+    </MenuItem>
+  ));
   const savedItems = savedElements.map((item, index) => (
     <div>
       <li>{item[1]}</li>
@@ -235,7 +350,8 @@ const App = () => {
           id="saveEdit"
           onClick={saveDrawings}
         >
-          Save {saveName}
+          Save edit
+          {/* Save {saveName} */}
         </Button>
       );
     } else {
@@ -273,7 +389,7 @@ const App = () => {
   }
 
   function deleteElement() {
-    if (selectedElement && elements) {
+    if (selectedElement && elements && tool === "Select") {
       const { id } = selectedElement;
       const elementsCopy = elements.filter((item) => item.id !== id);
       // elementsCopy = elementsCopy.splice(id, 1);
@@ -284,8 +400,9 @@ const App = () => {
   useLayoutEffect(() => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
     const roughCanvas = rough.canvas(canvas);
     const rect = generator.rectangle(100, 100, 150, 150);
     // roughCanvas.draw(rect);
@@ -501,126 +618,270 @@ const App = () => {
               className={navbarClasses.menuButton}
               color="inherit"
               aria-label="menu"
+              onClick={handleMenuClick}
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" className={navbarClasses.title}>
-              Draw Your Rectangles
-            </Typography>
-            <Button color="inherit" onClick={handleOpen}>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <div>
+                <text style={{ fontWeight: "bold" }}>Your Saved Drawings</text>
+                {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+                <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Logout</MenuItem> */}
+                {savedItemsMenu}
+              </div>
+            </Menu>
+
+            <Typography variant="h6">Draw Your Rectangles</Typography>
+            <div className={navbarClasses.title}></div>
+            <BottomNavigation
+              value={value}
+              onChange={(event, newValue) => {
+                setValue(newValue);
+              }}
+              showLabels
+              className={(navigationClasses.root, navbarClasses.drawing)}
+            >
+              <BottomNavigationAction
+                label="Select"
+                checked={tool === "Select"}
+                onClick={() => setTool("Select")}
+                icon={<RestoreIcon />}
+              />
+              <BottomNavigationAction
+                label="Draw"
+                checked={tool === "draw"}
+                onClick={() => setTool("draw")}
+                icon={<FavoriteIcon />}
+              />
+            </BottomNavigation>
+            <div className={navbarClasses.title}></div>
+            <div className={navbarClasses.title}>
+              <Fab
+                variant="extended"
+                color="secondary"
+                type="Button"
+                id="delete"
+                onClick={deleteElement}
+              >
+                Delete
+              </Fab>
+              <Fab
+                variant="extended"
+                color="disabled"
+                type="Button"
+                id="clear"
+                onClick={clearElements}
+              >
+                Clear
+              </Fab>
+              {editModeVisual}
+            </div>
+            <div className={navbarClasses.title}>
+              <form
+                id="form"
+                noValidate
+                autoComplete="off"
+                className={textFieldClasses.root}
+                onSubmit={saveDrawings}
+              >
+                {/* <label htmlFor="text">Drawing name: </label> */}
+                <TextField
+                  id="filled-disabled"
+                  label="File Name"
+                  variant="filled"
+                  InputPros={{
+                    className: textFieldClasses.input,
+                  }}
+                  value={drawingName}
+                  onChange={handleInputChange}
+                />
+                <Fab
+                  variant="extended"
+                  // color="primary"
+                  type="submit"
+                  id="save"
+                >
+                  Save
+                </Fab>
+              </form>
+            </div>
+            <Button color="inherit" onClick={loginClickOpen}>
               Login
             </Button>
-            <Modal
-              aria-labelledby="transition-modal-title"
-              aria-describedby="transition-modal-description"
-              className={modalClasses.modal}
-              open={open}
-              onClose={handleClose}
-              closeAfterTransition
-              BackdropComponent={Backdrop}
-              BackdropProps={{
-                timeout: 500,
-              }}
+            <Dialog
+              open={openLogin}
+              onClose={loginClickClose}
+              aria-labelledby="form-dialog-title"
             >
-              <Fade in={open}>
-                <div className={modalClasses.paper}>
-                  <h2 id="transition-modal-title">Transition modal</h2>
-                  <p id="transition-modal-description">
-                    react-transition-group animates me.
-                  </p>
-                </div>
-              </Fade>
-            </Modal>
-            <Button color="inherit" onClick={handleOpen}>
+              <DialogTitle id="form-dialog-title">Login</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  To save your drawings, please Log in to your account
+                </DialogContentText>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="name"
+                  label="Email Address"
+                  type="email"
+                  fullWidth
+                />
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="password"
+                  label="Password"
+                  type="password"
+                  fullWidth
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={loginClickClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={loginClickClose} color="primary">
+                  Login
+                </Button>
+              </DialogActions>
+            </Dialog>
+            <Button color="inherit" onClick={signupClickOpen}>
               Sign Up
             </Button>
+            <Dialog
+              open={openSignup}
+              onClose={signupClickClose}
+              aria-labelledby="form-dialog-title"
+            >
+              <DialogTitle id="form-dialog-title">Login</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  To save your drawings, please create an account
+                </DialogContentText>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="name"
+                  label="Email Address"
+                  type="email"
+                  fullWidth
+                />
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="password"
+                  label="Password"
+                  type="password"
+                  fullWidth
+                />
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="confirm password"
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={signupClickClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={signupClickClose} color="primary">
+                  Register
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Toolbar>
         </AppBar>
       </div>
-      <br />
-      <div style={{ position: "fixed" }}>
-        <input
-          type="radio"
-          id="Select"
-          checked={tool === "Select"}
-          onChange={() => setTool("Select")}
-        />
-        <label htmlFor="Move">Select</label>
-        {/* <input
-          type="radio"
-          id="Move"
-          checked={tool === "Move"}
-          onChange={() => setTool("Move")}
-        />
-        <label htmlFor="Move">Move</label> */}
-        <input
-          type="radio"
-          id="draw"
-          checked={tool === "draw"}
-          onChange={() => setTool("draw")}
-        />
-        <label htmlFor="draw">Draw</label>
-        <Button
-          variant="contained"
-          color="primary"
-          type="Button"
-          id="delete"
-          onClick={deleteElement}
-        >
-          Delete
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          type="Button"
-          id="clear"
-          onClick={clearElements}
-        >
-          Clear
-        </Button>
-
-        <form id="form" onSubmit={saveDrawings}>
-          <label htmlFor="text">Drawing name:</label>
-          <input
-            type="text"
-            id="text"
-            value={drawingName}
-            onChange={handleInputChange}
+      <div>
+        {/* <br /> */}
+        <div style={{ position: "fixed" }}>
+          {/* <input
+            type="radio"
+            id="Select"
+            checked={tool === "Select"}
+            onChange={() => setTool("Select")}
           />
-          <Button variant="contained" color="primary" type="submit" id="save">
-            Save
+          <label htmlFor="Move">Select</label>
+          <input
+            type="radio"
+            id="draw"
+            checked={tool === "draw"}
+            onChange={() => setTool("draw")}
+          />
+          <label htmlFor="draw">Draw</label> */}
+          {/* <Button
+            variant="contained"
+            color="primary"
+            type="Button"
+            id="delete"
+            onClick={deleteElement}
+          >
+            Delete
           </Button>
-        </form>
-        <br />
-        {/* <div>
+          <Button
+            variant="contained"
+            color="primary"
+            type="Button"
+            id="clear"
+            onClick={clearElements}
+          >
+            Clear
+          </Button>
+
+          <form id="form" onSubmit={saveDrawings}>
+            <label htmlFor="text">Drawing name:</label>
+            <input
+              type="text"
+              id="text"
+              value={drawingName}
+              onChange={handleInputChange}
+            />
+            <Button variant="contained" color="primary" type="submit" id="save">
+              Save
+            </Button>
+          </form> */}
+          {/* <br /> */}
+          {/* <div>
           <editModeVisual/>
         </div> */}
 
-        <div>{editModeVisual}</div>
-        <br />
-        <div>Your saved drawings:</div>
-        <ul>{savedItems}</ul>
-        <Button
-          variant="contained"
-          color="primary"
-          type="Button"
-          id="Get"
-          onClick={getSavedElements}
+          {/* <div>{editModeVisual}</div> */}
+          {/* <br />
+          <div>Your saved drawings:</div>
+          <ul>{savedItems}</ul> */}
+          <Button
+            variant="contained"
+            color="primary"
+            type="Button"
+            id="Get"
+            onClick={getSavedElements}
+          >
+            Get
+          </Button>
+        </div>
+
+        <canvas
+          // className={canvasClasses.canvasRoot}
+          id="canvas"
+          width={window.innerWidth}
+          height={window.innerHeight - 80}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
         >
-          Get
-        </Button>
+          {" "}
+          Canvas
+        </canvas>
       </div>
-      <canvas
-        id="canvas"
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
-        {" "}
-        Canvas
-      </canvas>
     </div>
   );
 };
