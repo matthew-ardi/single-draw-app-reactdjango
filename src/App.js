@@ -4,8 +4,53 @@ import ReactDOM from "react-dom";
 import Button from "@material-ui/core/Button";
 import axios from "axios";
 
+import { makeStyles } from "@material-ui/core/styles";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
+import Modal from "@material-ui/core/Modal";
+import Backdrop from "@material-ui/core/Backdrop";
+import Fade from "@material-ui/core/Fade";
+
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
+
+// STYLES CODE BELOW
+
+// Modal Styles
+
+const modalUseStyles = makeStyles((theme) => ({
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: "2px solid #000",
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+}));
+
+// NavBar Styles
+const navbarUseStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
+
+// STYLES CODE ABOVE
+
+// CORE APP CODE BELOW
 
 const generator = rough.generator();
 
@@ -118,6 +163,25 @@ const App = () => {
   const [drawingName, setDrawingName] = useState(null);
   const [editDrawing, setEditDrawing] = useState(null);
   const [getSaved, setGetSaved] = useState([]); // {saveId, saveName, corners, username}
+
+  // UI RELATED BELOW
+
+  // navbar
+  const navbarClasses = navbarUseStyles();
+
+  // modal
+  const modalClasses = modalUseStyles();
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // UI RELATED ABOVE
 
   function getSavedElements() {
     axios
@@ -429,6 +493,51 @@ const App = () => {
 
   return (
     <div>
+      <div className={navbarClasses.root}>
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton
+              edge="start"
+              className={navbarClasses.menuButton}
+              color="inherit"
+              aria-label="menu"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" className={navbarClasses.title}>
+              Draw Your Rectangles
+            </Typography>
+            <Button color="inherit" onClick={handleOpen}>
+              Login
+            </Button>
+            <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              className={modalClasses.modal}
+              open={open}
+              onClose={handleClose}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+              }}
+            >
+              <Fade in={open}>
+                <div className={modalClasses.paper}>
+                  <h2 id="transition-modal-title">Transition modal</h2>
+                  <p id="transition-modal-description">
+                    react-transition-group animates me.
+                  </p>
+                </div>
+              </Fade>
+            </Modal>
+            <Button color="inherit" onClick={handleOpen}>
+              Sign Up
+            </Button>
+          </Toolbar>
+        </AppBar>
+      </div>
+      <br />
       <div style={{ position: "fixed" }}>
         <input
           type="radio"
