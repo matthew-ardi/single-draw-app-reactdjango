@@ -53,6 +53,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'drawApp',
+    'users',
+    'rest_framework.authtoken', # new
+    'rest_auth', # new
+    'django.contrib.sites', # new
+    'allauth', # new
+    'allauth.account', # new
+    'allauth.socialaccount', # new
+    'rest_auth.registration', # new
 ]
 
 MIDDLEWARE = [
@@ -87,6 +95,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'drawAppBackend.wsgi.application'
 
+# User Authentication
+AUTH_USER_MODEL = 'users.CustomUser'
+# Django All Auth config. Add all of this.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+AUTHENTICATION_BACKENDS = (    "django.contrib.auth.backends.ModelBackend",    "allauth.account.auth_backends.AuthenticationBackend",)
+SITE_ID = 1 
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_UNIQUE_EMAIL = True
+# Rest Framework config. Add all of this.
+REST_FRAMEWORK = {    
+    'DATETIME_FORMAT': "%m/%d/%Y %I:%M%P",    
+    'DEFAULT_AUTHENTICATION_CLASSES': [        
+        'rest_framework.authentication.TokenAuthentication',    
+        ],
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -150,6 +176,11 @@ STATICFILES_DIRS = [
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
+
+CORS_ALLOWED_ORIGINS = [    
+'http://localhost:3000'
+]
 
 # CORS_ORIGIN_WHITELIST = [
 #      'http://localhost:3000'
