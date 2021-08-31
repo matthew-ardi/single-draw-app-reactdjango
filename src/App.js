@@ -33,6 +33,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import AccountCircle from "@material-ui/icons/AccountCircle";
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -239,6 +240,10 @@ const App = () => {
   const [drawingName, setDrawingName] = useState(null);
   const [editDrawing, setEditDrawing] = useState(null);
   const [getSaved, setGetSaved] = useState([]); // {saveId, saveName, corners, username}
+  const [username, setUsername] = useState(null);
+  const [password, setPassword] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState(null);
+  const [loginStateKey, setLoginStateKey] = useState(null);
 
   // UI RELATED BELOW
 
@@ -270,12 +275,26 @@ const App = () => {
   const loginFormClasses = loginFormUseStyles();
   const [openLogin, setOpenLogin] = React.useState(false);
   const [openSignup, setOpenSignup] = React.useState(false);
+  const [auth, setAuth] = React.useState(false);
+  const [anchorElProfile, setAnchorElProfile] = React.useState(null);
+  const openProfile = Boolean(anchorElProfile);
+
+  // if (loginStateKey !== null) {
+  //   setAuth(true);
+  //   setUsername(null);
+  //   setPassword(null);
+  //   setConfirmPassword(null);
+  // }
+
   const loginClickOpen = () => {
     setOpenLogin(true);
   };
 
   const loginClickClose = () => {
     setOpenLogin(false);
+    setUsername(null);
+    setPassword(null);
+    setConfirmPassword(null);
   };
 
   const signupClickOpen = () => {
@@ -284,7 +303,114 @@ const App = () => {
 
   const signupClickClose = () => {
     setOpenSignup(false);
+    setUsername(null);
+    setPassword(null);
+    setConfirmPassword(null);
   };
+
+  const handleProfileMenu = (event) => {
+    setAnchorElProfile(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setAnchorElProfile(null);
+  };
+
+  const usernameChange = (e) => {
+    setUsername(e.currentTarget.value);
+  };
+
+  const passwordChange = (e) => {
+    setPassword(e.currentTarget.value);
+  };
+  const confirmPasswordChange = (e) => {
+    setConfirmPassword(e.currentTarget.value);
+  };
+
+  // function openLogin() {
+  //   loginClickClose();
+  // }
+
+  function userSignUp() {
+    signupClickClose();
+    axios({
+      method: "post",
+      url: "/api/v1/users/auth/register/",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        email: username,
+        password1: password,
+        password2: confirmPassword,
+      },
+    })
+      .then(function (response) {
+        localStorage.setItem("userKey", JSON.stringify(response.data));
+        console.log(response.data);
+        const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
+        setLoginStateKey(userAuthKey.key);
+        setAuth(true);
+        // setUsername(null);
+        // setPassword(null);
+        // setConfirmPassword(null);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  function userLogout() {
+    handleProfileClose();
+    const authToken = "Token " + loginStateKey;
+    axios({
+      method: "post",
+      url: "/api/v1/users/auth/logout/",
+      headers: {
+        Authorization: authToken,
+      },
+    })
+      .then(function (response) {
+        localStorage.removeItem("userKey");
+        console.log(response.data);
+        setLoginStateKey(null);
+        setAuth(false);
+        // setUsername(null);
+        // setPassword(null);
+        // setConfirmPassword(null);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  function userLoggingin() {
+    loginClickClose();
+    axios({
+      method: "post",
+      url: "/api/v1/users/auth/login/",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        email: username,
+        password: password,
+      },
+    })
+      .then(function (response) {
+        localStorage.setItem("userKey", JSON.stringify(response.data));
+        console.log(response.data);
+        const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
+        setLoginStateKey(userAuthKey.key);
+        setAuth(true);
+        // setUsername(null);
+        // setPassword(null);
+        // setConfirmPassword(null);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
 
   // UI RELATED ABOVE
 
@@ -712,158 +838,136 @@ const App = () => {
                 </Fab>
               </form>
             </div>
-            <Button color="inherit" onClick={loginClickOpen}>
-              Login
-            </Button>
-            <Dialog
-              open={openLogin}
-              onClose={loginClickClose}
-              aria-labelledby="form-dialog-title"
-            >
-              <DialogTitle id="form-dialog-title">Login</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  To save your drawings, please Log in to your account
-                </DialogContentText>
-                <TextField
-                  margin="dense"
-                  id="name"
-                  label="Email Address"
-                  type="email"
-                  fullWidth
-                />
-                <TextField
-                  margin="dense"
-                  id="password"
-                  label="Password"
-                  type="password"
-                  fullWidth
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={loginClickClose} color="primary">
-                  Cancel
-                </Button>
-                <Button onClick={loginClickClose} color="primary">
+            {/* {loginButton} */}
+            {!auth && (
+              <div>
+                <Button color="inherit" onClick={loginClickOpen}>
                   Login
                 </Button>
-              </DialogActions>
-            </Dialog>
-            <Button color="inherit" onClick={signupClickOpen}>
-              Sign Up
-            </Button>
-            <Dialog
-              open={openSignup}
-              onClose={signupClickClose}
-              aria-labelledby="form-dialog-title"
-            >
-              <DialogTitle id="form-dialog-title">Register</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  To save your drawings, please create an account
-                </DialogContentText>
-                <TextField
-                  margin="dense"
-                  id="name"
-                  label="Email Address"
-                  type="email"
-                  fullWidth
-                />
-                <TextField
-                  margin="dense"
-                  id="password"
-                  label="Password"
-                  type="password"
-                  fullWidth
-                />
-                <TextField
-                  margin="dense"
-                  id="confirm password"
-                  label="Confirm Password"
-                  type="password"
-                  fullWidth
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={signupClickClose} color="primary">
-                  Cancel
+                <Dialog
+                  open={openLogin}
+                  onClose={loginClickClose}
+                  aria-labelledby="form-dialog-title"
+                >
+                  <DialogTitle id="form-dialog-title">Login</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      To save your drawings, please Log in to your account
+                    </DialogContentText>
+                    <TextField
+                      margin="dense"
+                      id="name"
+                      label="Email Address"
+                      type="email"
+                      fullWidth
+                      onChange={usernameChange}
+                    />
+                    <TextField
+                      margin="dense"
+                      id="password"
+                      label="Password"
+                      type="password"
+                      fullWidth
+                      onChange={passwordChange}
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={loginClickClose} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={userLoggingin} color="primary">
+                      Login
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </div>
+            )}
+            {/* {signupButton} */}
+            {!auth && (
+              <div>
+                <Button color="inherit" onClick={signupClickOpen}>
+                  Sign Up
                 </Button>
-                <Button onClick={signupClickClose} color="primary">
-                  Register
-                </Button>
-              </DialogActions>
-            </Dialog>
+                <Dialog
+                  open={openSignup}
+                  onClose={signupClickClose}
+                  aria-labelledby="form-dialog-title"
+                >
+                  <DialogTitle id="form-dialog-title">Register</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      To save your drawings, please create an account
+                    </DialogContentText>
+                    <TextField
+                      margin="dense"
+                      id="name"
+                      label="Email Address"
+                      type="email"
+                      fullWidth
+                      onChange={usernameChange}
+                    />
+                    <TextField
+                      margin="dense"
+                      id="password1"
+                      label="Password"
+                      type="password"
+                      fullWidth
+                      onChange={passwordChange}
+                    />
+                    <TextField
+                      margin="dense"
+                      id="password2"
+                      label="Confirm Password"
+                      type="password"
+                      fullWidth
+                      onChange={confirmPasswordChange}
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={signupClickClose} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={userSignUp} color="primary">
+                      Register
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </div>
+            )}
+            {auth && (
+              <div>
+                <IconButton
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleProfileMenu}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElProfile}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={openProfile}
+                  onClose={handleProfileClose}
+                >
+                  <MenuItem onClick={userLogout}>Logout</MenuItem>
+                </Menu>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
       </div>
       <div>
-        {/* <br /> */}
-        <div style={{ position: "fixed" }}>
-          {/* <input
-            type="radio"
-            id="Select"
-            checked={tool === "Select"}
-            onChange={() => setTool("Select")}
-          />
-          <label htmlFor="Move">Select</label>
-          <input
-            type="radio"
-            id="draw"
-            checked={tool === "draw"}
-            onChange={() => setTool("draw")}
-          />
-          <label htmlFor="draw">Draw</label> */}
-          {/* <Button
-            variant="contained"
-            color="primary"
-            type="Button"
-            id="delete"
-            onClick={deleteElement}
-          >
-            Delete
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            type="Button"
-            id="clear"
-            onClick={clearElements}
-          >
-            Clear
-          </Button>
-
-          <form id="form" onSubmit={saveDrawings}>
-            <label htmlFor="text">Drawing name:</label>
-            <input
-              type="text"
-              id="text"
-              value={drawingName}
-              onChange={handleInputChange}
-            />
-            <Button variant="contained" color="primary" type="submit" id="save">
-              Save
-            </Button>
-          </form> */}
-          {/* <br /> */}
-          {/* <div>
-          <editModeVisual/>
-        </div> */}
-
-          {/* <div>{editModeVisual}</div> */}
-          {/* <br />
-          <div>Your saved drawings:</div>
-          <ul>{savedItems}</ul> */}
-          <Button
-            variant="contained"
-            color="primary"
-            type="Button"
-            id="Get"
-            onClick={getSavedElements}
-          >
-            Get
-          </Button>
-        </div>
-
         <canvas
           // className={canvasClasses.canvasRoot}
           id="canvas"
