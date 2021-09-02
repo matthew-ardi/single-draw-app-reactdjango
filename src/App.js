@@ -230,6 +230,7 @@ const getElementAtPosition = (x, y, elements) => {
     .find((element) => element.position !== null);
 };
 
+// export const [loginStateKey, setLoginStateKey] = useState(null);
 const App = () => {
   const [elements, setElements] = useState([]);
   const [action, setAction] = useState("none");
@@ -243,7 +244,10 @@ const App = () => {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
-  const [loginStateKey, setLoginStateKey] = useState(null);
+  const [loginStateKey, setLoginStateKey] = useState(() => {
+    const keyStorage = localStorage.getItem("userKey");
+    return keyStorage !== null ? JSON.parse(keyStorage).key : null;
+  });
 
   // UI RELATED BELOW
 
@@ -275,9 +279,18 @@ const App = () => {
   const loginFormClasses = loginFormUseStyles();
   const [openLogin, setOpenLogin] = React.useState(false);
   const [openSignup, setOpenSignup] = React.useState(false);
-  const [auth, setAuth] = React.useState(false);
+  const [auth, setAuth] = React.useState(() => {
+    const keyStorage = localStorage.getItem("userKey");
+    return keyStorage !== null ? true : false;
+  });
   const [anchorElProfile, setAnchorElProfile] = React.useState(null);
   const openProfile = Boolean(anchorElProfile);
+
+  // function fetchUserKey() {
+  //   // const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
+  //   // setLoginStateKey(userAuthKey.key);
+  //   setAuth(true);
+  // }
 
   // if (loginStateKey !== null) {
   //   setAuth(true);
@@ -363,6 +376,7 @@ const App = () => {
   function userLogout() {
     handleProfileClose();
     const authToken = "Token " + loginStateKey;
+    // console.log(authToken);
     axios({
       method: "post",
       url: "/api/v1/users/auth/logout/",
@@ -380,6 +394,7 @@ const App = () => {
         // setConfirmPassword(null);
       })
       .catch(function (error) {
+        localStorage.removeItem("userKey");
         console.log(error);
       });
   }
