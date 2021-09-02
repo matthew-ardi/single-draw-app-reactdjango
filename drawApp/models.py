@@ -1,4 +1,7 @@
 from django.db import models
+# from rest_framework import permissions
+from drawAppBackend import settings
+
 # from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
@@ -11,7 +14,7 @@ class DrawApp(models.Model):
         return self.title
 
 class SavedDrawings(models.Model):
-    username = models.CharField(max_length=120)
+    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     saveId = models.IntegerField()
     saveName = models.CharField(max_length=500)
     corners = models.JSONField()

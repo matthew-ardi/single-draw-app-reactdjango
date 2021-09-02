@@ -1,11 +1,10 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .serializers import DrawAppSerializer, SavedDrawingsSerializer
 from .models import DrawApp, SavedDrawings
 from django.views import View
 from django.http import HttpResponse, HttpResponseNotFound
-import os
-
+import os, sys
 
 # Create your views here.
 
@@ -16,6 +15,18 @@ class DrawAppView(viewsets.ModelViewSet):
 class SavedDrawingsView(viewsets.ModelViewSet):
     serializer_class = SavedDrawingsSerializer
     queryset = SavedDrawings.objects.all()
+
+# class SavedDrawingsView(viewsets.ModelViewSet):
+#     serializer_class = SavedDrawingsSerializer
+#     permission_classes = [permissions.IsAuthenticated, ]
+#     def get_queryset(self):
+#         # logging.info(user)
+#         user = self.request.user
+#         queryset =  SavedDrawings.objects.all()
+#         return queryset.filter(username=user)
+    
+    def pre_save(self, obj):
+        obj.created_by = self.request.user
 
 class Assets(View):
 
