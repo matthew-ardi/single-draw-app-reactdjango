@@ -12,18 +12,19 @@ class DrawAppView(viewsets.ModelViewSet):
     serializer_class = DrawAppSerializer
     queryset = DrawApp.objects.all()
 
+# class SavedDrawingsView(viewsets.ModelViewSet):
+#     permission_classes = [permissions.IsAuthenticated, ]
+#     serializer_class = SavedDrawingsSerializer
+#     queryset = SavedDrawings.objects.all()
+
 class SavedDrawingsView(viewsets.ModelViewSet):
     serializer_class = SavedDrawingsSerializer
-    queryset = SavedDrawings.objects.all()
-
-# class SavedDrawingsView(viewsets.ModelViewSet):
-#     serializer_class = SavedDrawingsSerializer
-#     permission_classes = [permissions.IsAuthenticated, ]
-#     def get_queryset(self):
-#         # logging.info(user)
-#         user = self.request.user
-#         queryset =  SavedDrawings.objects.all()
-#         return queryset.filter(username=user)
+    permission_classes = [permissions.IsAuthenticated, ]
+    def get_queryset(self):
+        # logging.info(user)
+        user = self.request.user
+        queryset =  SavedDrawings.objects.all()
+        return queryset.filter(username=user)
     
     def pre_save(self, obj):
         obj.created_by = self.request.user
