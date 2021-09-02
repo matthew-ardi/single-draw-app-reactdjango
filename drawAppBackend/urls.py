@@ -22,11 +22,14 @@ from django.views.generic import TemplateView
 router = routers.DefaultRouter()
 router.register(r'drawApps', views.DrawAppView, 'drawApp')
 router.register(r'drawings', views.SavedDrawingsView, 'drawApp')
+# router.register(r'drawings/', views.SavedDrawingsList, 'drawApp')
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/drawings/<int:id>', views.SavedDrawingsList),
     path('draw/',TemplateView.as_view(template_name='index.html')),
     path('api/v1/users/', include('users.urls')),
 ]

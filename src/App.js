@@ -248,6 +248,7 @@ const App = () => {
     const keyStorage = localStorage.getItem("userKey");
     return keyStorage !== null ? JSON.parse(keyStorage).key : null;
   });
+  const [userPk, setUserPk] = useState(null);
 
   // UI RELATED BELOW
 
@@ -520,6 +521,44 @@ const App = () => {
     } else if (elements && editDrawing !== null) {
       const saveId = editDrawing;
       savedElements[saveId][2] = elements;
+    }
+    if (auth) {
+      const { x1, y1, x2, y2 } = elements;
+      const authToken = "Token " + loginStateKey;
+
+      if (userPk === null) {
+        axios
+          .get("/api/v1/users/auth/user/", {
+            headers: { Authorization: authToken },
+          })
+          .then((res) => setUserPk(res.data.pk))
+          .catch((err) => console.log(err));
+      }
+      axios({
+        method: "post",
+        url: "/api/drawings/",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authToken,
+        },
+        data: {
+          username: userPk,
+          saveId: drawingIndex,
+          saveName: drawingName,
+          corners: {
+            x1: x1,
+            x2: x2,
+            y1: y1,
+            y2: y2,
+          },
+        },
+      })
+        .then(function (response) {
+          console.log(response.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
   }
 
