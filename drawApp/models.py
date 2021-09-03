@@ -5,6 +5,8 @@ from drawAppBackend import settings
 # from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
+
+
 class DrawApp(models.Model):
     title = models.CharField(max_length=120)
     description = models.TextField()
@@ -13,11 +15,13 @@ class DrawApp(models.Model):
     def _str_(self):
         return self.title
 
+
 class SavedDrawings(models.Model):
-    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    username = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     saveId = models.IntegerField()
     saveName = models.CharField(max_length=500)
-    corners = models.JSONField()
+    corners = models.TextField()
 
 # class CustomUser(AbstractUser):
 #     # Any extra fields would go here

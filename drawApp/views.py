@@ -25,7 +25,7 @@ class DrawAppView(viewsets.ModelViewSet):
 
 class SavedDrawingsView(viewsets.ModelViewSet):
     serializer_class = SavedDrawingsSerializer
-    permission_classes = [permissions.IsAuthenticated, ]
+    # permission_classes = [permissions.IsAuthenticated, ]
 
     def get_queryset(self):
         # logging.info(user)
@@ -38,7 +38,7 @@ class SavedDrawingsView(viewsets.ModelViewSet):
 
 
 @api_view(['DELETE', 'PUT'])
-@permission_classes((permissions.IsAuthenticated, ))
+# @permission_classes((permissions.IsAuthenticated, ))
 def SavedDrawingsList(request, id):
     try:
         drawing = SavedDrawings.objects.get(id=id)

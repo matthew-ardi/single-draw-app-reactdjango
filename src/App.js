@@ -34,6 +34,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import AccountCircle from "@material-ui/icons/AccountCircle";
+import qs from "qs";
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -398,6 +399,9 @@ const App = () => {
         localStorage.removeItem("userKey");
         console.log(error);
       });
+    setUserPk(null);
+    setElements([]);
+    setSavedElements([]);
   }
 
   function userLoggingin() {
@@ -426,16 +430,44 @@ const App = () => {
       .catch(function (error) {
         console.log(error);
       });
+    getSavedElements();
   }
 
   // UI RELATED ABOVE
 
   function getSavedElements() {
+    const authToken = "Token " + loginStateKey;
+
     axios
-      .get("api/drawings")
-      .then((res) => setGetSaved(res.data))
+      .get("/api/drawings", {
+        headers: { Authorization: authToken },
+      })
+      .then((res) => setGetSaved(res.data.map(({ corners }) => corners)))
       .catch((err) => console.log(err));
+    // console.log(response);
+    // const trimmedData = response.data;
+    // console.log(trimmedData);
+  }
+
+  function manualSavedRetrieval() {
     console.log(getSaved);
+    console.log(JSON.parse(getSaved));
+    getSaved.map((drawing, index) => console.log(JSON.parse(drawing[index])));
+    // getSaved.map((item, index) => console.log(item[index]));
+
+    // (
+    //   setSavedElements((prevState) => [
+    //     ...prevState,
+    //     [
+    //       item,
+    //       item[1],
+    //       drawing[2],
+    //       drawing[3],
+    //       drawing[4],
+    //       drawing[5],
+    //     ],
+    //   ]))
+    // );
   }
 
   function openDrawing(saveId) {
@@ -502,10 +534,19 @@ const App = () => {
   }
   const editModeVisual = editVisual();
 
-  // function editModeVisual() {
-  //   if (editDrawing) {
-  //     return <editVisual />;
-  //   }
+  function updateUserPk() {
+    const authToken = "Token " + loginStateKey;
+    if (userPk === null) {
+      axios
+        .get("/api/v1/users/auth/user/", {
+          headers: { Authorization: authToken },
+        })
+        .then((res) => {
+          setUserPk(res.data.pk);
+        })
+        .catch((err) => console.log(err));
+    }
+  }
 
   function handleInputChange(event) {
     setDrawingName(event.target.value);
@@ -522,18 +563,36 @@ const App = () => {
       const saveId = editDrawing;
       savedElements[saveId][2] = elements;
     }
+
+    // const elementsOutput = JSON.stringify(elements);
+    const elementsOutput = JSON.stringify(
+      elements.map(({ id, x1, y1, x2, y2 }) => [
+        id,
+        drawingName,
+        x1,
+        y1,
+        x2,
+        y2,
+      ])
+    );
+    console.log(elementsOutput);
+    // const testParsed = JSON.parse(elementsOutput);
+    // console.log(testParsed);
+    // setElements([]);
+    // testParsed.map(({ id, x1, y1, x2, y2 }) =>
+    //   updateElement(id, 0, 0, 0, 0, "")
+    // );
+
+    // setElements(JSON.parse(elementsOutput));
     if (auth) {
       const { x1, y1, x2, y2 } = elements;
       const authToken = "Token " + loginStateKey;
-
-      if (userPk === null) {
-        axios
-          .get("/api/v1/users/auth/user/", {
-            headers: { Authorization: authToken },
-          })
-          .then((res) => setUserPk(res.data.pk))
-          .catch((err) => console.log(err));
-      }
+      const cornersData = {
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+      };
       axios({
         method: "post",
         url: "/api/drawings/",
@@ -545,12 +604,7 @@ const App = () => {
           username: userPk,
           saveId: drawingIndex,
           saveName: drawingName,
-          corners: {
-            x1: x1,
-            x2: x2,
-            y1: y1,
-            y2: y2,
-          },
+          corners: elementsOutput,
         },
       })
         .then(function (response) {
@@ -831,13 +885,19 @@ const App = () => {
               <BottomNavigationAction
                 label="Select"
                 checked={tool === "Select"}
-                onClick={() => setTool("Select")}
+                onClick={() => {
+                  setTool("Select");
+                  updateUserPk();
+                }}
                 icon={<RestoreIcon />}
               />
               <BottomNavigationAction
                 label="Draw"
                 checked={tool === "draw"}
-                onClick={() => setTool("draw")}
+                onClick={() => {
+                  setTool("draw");
+                  updateUserPk();
+                }}
                 icon={<FavoriteIcon />}
               />
             </BottomNavigation>
@@ -990,6 +1050,12 @@ const App = () => {
             )}
             {auth && (
               <div>
+                <Button color="inherit" onClick={getSavedElements}>
+                  Get Saved
+                </Button>
+                <Button color="inherit" onClick={manualSavedRetrieval}>
+                  Load Saved
+                </Button>
                 <IconButton
                   aria-label="account of current user"
                   aria-controls="menu-appbar"
