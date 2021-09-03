@@ -1,70 +1,60 @@
-# Getting Started with Create React App
+# Deployed Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[https://drawing-app-dev3-backend.herokuapp.com/draw/](https://drawing-app-dev3-backend.herokuapp.com/draw/)
 
-## Available Scripts
+# How to run this Drawing App locally
 
-In the project directory, you can run:
+1. Clone this repository on the `main` branch
+2. Create Virtual Environment
 
-### `yarn start`
+```
+$ python3 -m venv venv
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+3. activate virtual environment
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```
+$ pip install pipenv #python2, or,
+$ pip3 install pipenv #python3
+```
 
-### `yarn test`
+4. enter virtual environment shell
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+$ pipenv shell
+```
 
-### `yarn build`
+5. install all Django dependencies
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+$ pip install requirements.txt
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+6. Build React front end
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+$ npm run build
+```
 
-### `yarn eject`
+7. Create migrations on your virtual environment
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+$ python manage.py makemigrations
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+8. Migrate Django backend models into DB
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+$ python manage.py migrate
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+9. Run the application
 
-## Learn More
+```
+$ python manage.py runserver
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The application is now accessible at:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Drawing Page: [http://localhost:8000/draw](http://localhost:8000/draw)
+- Admin Page: [http://localhost:8000/admin](http://localhost:8000/admin)
