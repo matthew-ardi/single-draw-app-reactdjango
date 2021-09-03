@@ -35,6 +35,9 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import qs from "qs";
+import GestureIcon from "@material-ui/icons/Gesture";
+import MouseIcon from "@material-ui/icons/Mouse";
+import PermMediaIcon from "@material-ui/icons/PermMedia";
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -399,9 +402,11 @@ const App = () => {
         localStorage.removeItem("userKey");
         console.log(error);
       });
+
     setUserPk(null);
-    setElements([]);
-    setSavedElements([]);
+    // setElements([]);
+    // setSavedElements([]);
+    clearElements();
   }
 
   function userLoggingin() {
@@ -854,7 +859,7 @@ const App = () => {
               aria-label="menu"
               onClick={handleMenuClick}
             >
-              <MenuIcon />
+              <PermMediaIcon />
             </IconButton>
             <Menu
               id="simple-menu"
@@ -889,7 +894,7 @@ const App = () => {
                   setTool("Select");
                   updateUserPk();
                 }}
-                icon={<RestoreIcon />}
+                icon={<MouseIcon />}
               />
               <BottomNavigationAction
                 label="Draw"
@@ -898,7 +903,7 @@ const App = () => {
                   setTool("draw");
                   updateUserPk();
                 }}
-                icon={<FavoriteIcon />}
+                icon={<GestureIcon />}
               />
             </BottomNavigation>
             <div className={navbarClasses.title}></div>
