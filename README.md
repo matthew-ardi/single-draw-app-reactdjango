@@ -2,6 +2,10 @@
 
 [https://drawing-app-dev3-backend.herokuapp.com/draw/](https://drawing-app-dev3-backend.herokuapp.com/draw/)
 
+# Stack Architecture
+
+![architecture](/readmeImg/architecture.png)
+
 # How to run this Drawing App locally
 
 1. Clone this repository on the `main` branch
