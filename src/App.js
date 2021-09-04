@@ -404,8 +404,7 @@ const App = () => {
       });
 
     setUserPk(null);
-    // setElements([]);
-    // setSavedElements([]);
+    setSavedElements([]);
     clearElements();
   }
 
@@ -425,54 +424,97 @@ const App = () => {
       .then(function (response) {
         localStorage.setItem("userKey", JSON.stringify(response.data));
         console.log(response.data);
-        const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
+        let userAuthKey = JSON.parse(localStorage.getItem("userKey"));
         setLoginStateKey(userAuthKey.key);
         setAuth(true);
+        getSavedElements(userAuthKey.key);
         // setUsername(null);
         // setPassword(null);
         // setConfirmPassword(null);
       })
+      // .then(function (response) {
+      //   console.log(response);
+      //   console.log(loginStateKey);
+      //   let dataInput = response.data;
+      //   let userAuthKey = dataInput.key;
+      //   getSavedElements(userAuthKey);
+      // })
       .catch(function (error) {
         console.log(error);
       });
-    getSavedElements();
   }
 
   // UI RELATED ABOVE
-
-  function getSavedElements() {
-    const authToken = "Token " + loginStateKey;
+  // function getSavedElementsAsync(authKey) {
+  //   getSavedElements();
+  // }
+  function getSavedElements(authKey) {
+    const authToken = "Token " + authKey;
 
     axios
       .get("/api/drawings", {
         headers: { Authorization: authToken },
       })
-      .then((res) => setGetSaved(res.data.map(({ corners }) => corners)))
+      .then(function (response) {
+        setGetSaved(
+          response.data.map(({ saveName, corners, saveId }) => [
+            saveName,
+            corners,
+            saveId,
+          ])
+        );
+        console.log(response.data);
+      })
       .catch((err) => console.log(err));
+
+    // _callback();
     // console.log(response);
     // const trimmedData = response.data;
     // console.log(trimmedData);
   }
 
+  function loadDrawing(drawName, corners, drawingIndex) {
+    // console.log(corners[0]);
+    // let drawingIndex = corners[0];
+    let mainElements = [];
+    corners.forEach((rectangle) => {
+      let newElement = createElement(
+        rectangle[0],
+        rectangle[1],
+        rectangle[2],
+        rectangle[3],
+        rectangle[4],
+        "draw",
+        ""
+      );
+      // console.log("newElement: " + newElement);
+      mainElements = [...mainElements, newElement];
+    });
+
+    setSavedElements((prevState) => [
+      ...prevState,
+      [drawingIndex, drawName, mainElements],
+    ]);
+    setElements([]);
+  }
+
   function manualSavedRetrieval() {
     console.log(getSaved);
-    console.log(JSON.parse(getSaved));
-    getSaved.map((drawing, index) => console.log(JSON.parse(drawing[index])));
-    // getSaved.map((item, index) => console.log(item[index]));
-
-    // (
-    //   setSavedElements((prevState) => [
-    //     ...prevState,
-    //     [
-    //       item,
-    //       item[1],
-    //       drawing[2],
-    //       drawing[3],
-    //       drawing[4],
-    //       drawing[5],
-    //     ],
-    //   ]))
-    // );
+    // console.log(JSON.parse(getSaved));
+    // let jsonSaved = JSON.parse(getSaved);
+    // console.log(getSaved[0][1]);
+    let cornersArray = null;
+    let tempDrawingName = null;
+    let saveIndex = null;
+    getSaved.forEach((item) => {
+      tempDrawingName = item[0];
+      saveIndex = item[2];
+      console.log(item[0]);
+      console.log(item[1]);
+      let corners = JSON.parse(item[1]);
+      console.log(corners);
+      loadDrawing(tempDrawingName, corners, saveIndex);
+    });
   }
 
   function openDrawing(saveId) {
@@ -570,34 +612,17 @@ const App = () => {
     }
 
     // const elementsOutput = JSON.stringify(elements);
-    const elementsOutput = JSON.stringify(
-      elements.map(({ id, x1, y1, x2, y2 }) => [
-        id,
-        drawingName,
-        x1,
-        y1,
-        x2,
-        y2,
-      ])
+    let elementsOutput = JSON.stringify(
+      elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
     );
     console.log(elementsOutput);
-    // const testParsed = JSON.parse(elementsOutput);
-    // console.log(testParsed);
-    // setElements([]);
-    // testParsed.map(({ id, x1, y1, x2, y2 }) =>
-    //   updateElement(id, 0, 0, 0, 0, "")
-    // );
+    // elementsOutput = JSON.parse(elementsOutput);
+    // console.log(elementsOutput);
 
     // setElements(JSON.parse(elementsOutput));
     if (auth) {
       const { x1, y1, x2, y2 } = elements;
       const authToken = "Token " + loginStateKey;
-      const cornersData = {
-        x1: x1,
-        x2: x2,
-        y1: y1,
-        y2: y2,
-      };
       axios({
         method: "post",
         url: "/api/drawings/",
@@ -1055,9 +1080,6 @@ const App = () => {
             )}
             {auth && (
               <div>
-                <Button color="inherit" onClick={getSavedElements}>
-                  Get Saved
-                </Button>
                 <Button color="inherit" onClick={manualSavedRetrieval}>
                   Load Saved
                 </Button>
