@@ -25,20 +25,25 @@ class DrawAppView(viewsets.ModelViewSet):
 
 class SavedDrawingsView(viewsets.ModelViewSet):
     serializer_class = SavedDrawingsSerializer
-    # permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated, ]
 
     def get_queryset(self):
         # logging.info(user)
         user = self.request.user
         queryset = SavedDrawings.objects.all()
-        return queryset.filter(username=user)
+        saveId = self.request.query_params.get('saveId')
+
+        if saveId:
+            return queryset.filter(username=user, saveId=saveId)
+        else:
+            return queryset.filter(username=user)
 
     def pre_save(self, obj):
         obj.created_by = self.request.user
 
 
 @api_view(['DELETE', 'PUT'])
-# @permission_classes((permissions.IsAuthenticated, ))
+@permission_classes((permissions.IsAuthenticated, ))
 def SavedDrawingsList(request, id):
     try:
         drawing = SavedDrawings.objects.get(id=id)
