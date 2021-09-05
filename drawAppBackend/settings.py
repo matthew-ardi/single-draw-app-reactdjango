@@ -18,7 +18,6 @@ import dotenv
 import dj_database_url
 
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,7 +28,8 @@ if os.path.isfile(dotenv_file):
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-3xxkpcw%ye&vo_zlzvsmork$_9k%t6%cz^tna#*u&fd2ck$yhc')
+SECRET_KEY = os.getenv(
+    'SECRET_KEY', 'django-insecure-3xxkpcw%ye&vo_zlzvsmork$_9k%t6%cz^tna#*u&fd2ck$yhc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,13 +55,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'drawApp',
     'users',
-    'rest_framework.authtoken', # new
-    'rest_auth', # new
-    'django.contrib.sites', # new
-    'allauth', # new
-    'allauth.account', # new
-    'allauth.socialaccount', # new
-    'rest_auth.registration', # new
+    'rest_framework.authtoken',  # new
+    'rest_auth',  # new
+    'django.contrib.sites',  # new
+    'allauth',  # new
+    'allauth.account',  # new
+    'allauth.socialaccount',  # new
+    'rest_auth.registration',  # new
 ]
 
 MIDDLEWARE = [
@@ -100,19 +100,20 @@ WSGI_APPLICATION = 'drawAppBackend.wsgi.application'
 AUTH_USER_MODEL = 'users.CustomUser'
 # Django All Auth config. Add all of this.
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-AUTHENTICATION_BACKENDS = (    "django.contrib.auth.backends.ModelBackend",    "allauth.account.auth_backends.AuthenticationBackend",)
-SITE_ID = 1 
+AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",
+                           "allauth.account.auth_backends.AuthenticationBackend",)
+SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 # Rest Framework config. Add all of this.
-REST_FRAMEWORK = {    
-    'DATETIME_FORMAT': "%m/%d/%Y %I:%M%P",    
-    'DEFAULT_AUTHENTICATION_CLASSES': [        
-        'rest_framework.authentication.TokenAuthentication',    
-        ],
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': "%m/%d/%Y %I:%M%P",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 # Database
@@ -170,17 +171,15 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'build/static')
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
-
-CORS_ALLOWED_ORIGINS = [    
-'http://localhost:3000'
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000'
 ]
 
 # CORS_ORIGIN_WHITELIST = [
