@@ -457,10 +457,11 @@ const App = () => {
       })
       .then(function (response) {
         setGetSaved(
-          response.data.map(({ saveName, corners, saveId }) => [
+          response.data.map(({ saveName, corners, saveId, id }) => [
             saveName,
             corners,
             saveId,
+            id,
           ])
         );
         console.log(response.data);
@@ -473,7 +474,7 @@ const App = () => {
     // console.log(trimmedData);
   }
 
-  function loadDrawing(drawName, corners, drawingIndex) {
+  function loadDrawing(drawName, corners, drawingIndex, dbId) {
     // console.log(corners[0]);
     // let drawingIndex = corners[0];
     let mainElements = [];
@@ -493,7 +494,7 @@ const App = () => {
 
     setSavedElements((prevState) => [
       ...prevState,
-      [drawingIndex, drawName, mainElements],
+      [drawingIndex, drawName, mainElements, dbId],
     ]);
     setElements([]);
   }
@@ -506,14 +507,17 @@ const App = () => {
     let cornersArray = null;
     let tempDrawingName = null;
     let saveIndex = null;
+    let dbId;
     getSaved.forEach((item) => {
       tempDrawingName = item[0];
       saveIndex = item[2];
-      console.log(item[0]);
-      console.log(item[1]);
+      dbId = item[3];
+      // console.log(item[0]);
+      // console.log(item[1]);
+      // console.log(item[3]);
       let corners = JSON.parse(item[1]);
       console.log(corners);
-      loadDrawing(tempDrawingName, corners, saveIndex);
+      loadDrawing(tempDrawingName, corners, saveIndex, dbId);
     });
   }
 
@@ -598,6 +602,7 @@ const App = () => {
   function handleInputChange(event) {
     setDrawingName(event.target.value);
   }
+
   function saveDrawings(event) {
     event.preventDefault();
     const drawingIndex = savedElements.length;
@@ -606,43 +611,59 @@ const App = () => {
         ...prevState,
         [drawingIndex, drawingName, elements],
       ]);
+      if (auth) {
+        let elementsOutput = JSON.stringify(
+          elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
+        );
+        const { x1, y1, x2, y2 } = elements;
+        const authToken = "Token " + loginStateKey;
+        axios({
+          method: "post",
+          url: "/api/drawings/",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authToken,
+          },
+          data: {
+            username: userPk,
+            saveId: drawingIndex,
+            saveName: drawingName,
+            corners: elementsOutput,
+          },
+        })
+          .then(function (response) {
+            console.log(response.data);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
     } else if (elements && editDrawing !== null) {
       const saveId = editDrawing;
       savedElements[saveId][2] = elements;
-    }
-
-    // const elementsOutput = JSON.stringify(elements);
-    let elementsOutput = JSON.stringify(
-      elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
-    );
-    console.log(elementsOutput);
-    // elementsOutput = JSON.parse(elementsOutput);
-    // console.log(elementsOutput);
-
-    // setElements(JSON.parse(elementsOutput));
-    if (auth) {
-      const { x1, y1, x2, y2 } = elements;
-      const authToken = "Token " + loginStateKey;
-      axios({
-        method: "post",
-        url: "/api/drawings/",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authToken,
-        },
-        data: {
-          username: userPk,
-          saveId: drawingIndex,
-          saveName: drawingName,
-          corners: elementsOutput,
-        },
-      })
-        .then(function (response) {
-          console.log(response.data);
-        })
-        .catch(function (error) {
-          console.log(error);
+      let index = savedElements[saveId][0];
+      let drawName = savedElements[saveId][1];
+      if (auth) {
+        let dbId = savedElements[saveId][3];
+        const authToken = "Token " + loginStateKey;
+        let elementsOutput = JSON.stringify(
+          elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
+        );
+        axios({
+          method: "put",
+          url: "/api/drawings/" + dbId,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authToken,
+          },
+          data: {
+            username: userPk,
+            saveId: index,
+            saveName: drawName,
+            corners: elementsOutput,
+          },
         });
+      }
     }
   }
 
