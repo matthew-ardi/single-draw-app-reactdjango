@@ -369,9 +369,13 @@ const App = () => {
         const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
         setLoginStateKey(userAuthKey.key);
         setAuth(true);
+        return userAuthKey;
         // setUsername(null);
         // setPassword(null);
         // setConfirmPassword(null);
+      })
+      .then(function (key) {
+        updateUserPk(key);
       })
       .catch(function (error) {
         console.log(error);
@@ -427,11 +431,11 @@ const App = () => {
         let userAuthKey = JSON.parse(localStorage.getItem("userKey"));
         setLoginStateKey(userAuthKey.key);
         setAuth(true);
-        return getSavedElements(userAuthKey.key);
-        // return response.data;
-        // setUsername(null);
-        // setPassword(null);
-        // setConfirmPassword(null);
+        return userAuthKey.key;
+      })
+      .then(function (key) {
+        updateUserPk(key);
+        return getSavedElements(key);
       })
       .then(function (parsedSavedElements) {
         console.log("parsedSavedElements: ");
@@ -599,15 +603,23 @@ const App = () => {
   }
   const editModeVisual = editVisual();
 
-  function updateUserPk() {
-    const authToken = "Token " + loginStateKey;
+  function checkUserPk() {
     if (userPk === null) {
-      axios
+      updateUserPk(loginStateKey);
+    }
+  }
+
+  function updateUserPk(key) {
+    let authToken = "Token " + key;
+
+    if (key && userPk === null) {
+      return axios
         .get("/api/v1/users/auth/user/", {
           headers: { Authorization: authToken },
         })
         .then((res) => {
           setUserPk(res.data.pk);
+          return res.data.pk;
         })
         .catch((err) => console.log(err));
     }
@@ -952,7 +964,7 @@ const App = () => {
                 checked={tool === "Select"}
                 onClick={() => {
                   setTool("Select");
-                  updateUserPk();
+                  checkUserPk();
                 }}
                 icon={<MouseIcon />}
               />
@@ -961,7 +973,7 @@ const App = () => {
                 checked={tool === "draw"}
                 onClick={() => {
                   setTool("draw");
-                  updateUserPk();
+                  checkUserPk();
                 }}
                 icon={<GestureIcon />}
               />
