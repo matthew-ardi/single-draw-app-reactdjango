@@ -427,10 +427,17 @@ const App = () => {
         let userAuthKey = JSON.parse(localStorage.getItem("userKey"));
         setLoginStateKey(userAuthKey.key);
         setAuth(true);
-        getSavedElements(userAuthKey.key);
+        return getSavedElements(userAuthKey.key);
+        // return response.data;
         // setUsername(null);
         // setPassword(null);
         // setConfirmPassword(null);
+      })
+      .then(function (parsedSavedElements) {
+        console.log("parsedSavedElements: ");
+        console.log(parsedSavedElements);
+        manualSavedRetrieval(parsedSavedElements);
+        return;
       })
       // .then(function (response) {
       //   console.log(response);
@@ -451,7 +458,7 @@ const App = () => {
   function getSavedElements(authKey) {
     const authToken = "Token " + authKey;
 
-    axios
+    return axios
       .get("/api/drawings", {
         headers: { Authorization: authToken },
       })
@@ -465,6 +472,12 @@ const App = () => {
           ])
         );
         console.log(response.data);
+        return response.data.map(({ saveName, corners, saveId, id }) => [
+          saveName,
+          corners,
+          saveId,
+          id,
+        ]);
       })
       .catch((err) => console.log(err));
 
@@ -499,8 +512,9 @@ const App = () => {
     setElements([]);
   }
 
-  function manualSavedRetrieval() {
-    console.log(getSaved);
+  function manualSavedRetrieval(parsedRetrievedElements) {
+    // console.log("getSavedManual: ");
+    // console.log(getSaved);
     // console.log(JSON.parse(getSaved));
     // let jsonSaved = JSON.parse(getSaved);
     // console.log(getSaved[0][1]);
@@ -508,7 +522,7 @@ const App = () => {
     let tempDrawingName = null;
     let saveIndex = null;
     let dbId;
-    getSaved.forEach((item) => {
+    parsedRetrievedElements.forEach((item) => {
       tempDrawingName = item[0];
       saveIndex = item[2];
       dbId = item[3];
@@ -1101,9 +1115,9 @@ const App = () => {
             )}
             {auth && (
               <div>
-                <Button color="inherit" onClick={manualSavedRetrieval}>
+                {/* <Button color="inherit" onClick={manualSavedRetrieval}>
                   Load Saved
-                </Button>
+                </Button> */}
                 <IconButton
                   aria-label="account of current user"
                   aria-controls="menu-appbar"
