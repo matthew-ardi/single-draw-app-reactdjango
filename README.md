@@ -2,6 +2,10 @@
 
 [https://drawing-app-dev3-backend.herokuapp.com/draw/](https://drawing-app-dev3-backend.herokuapp.com/draw/)
 
+Supported Browsers: Chome, Firefox
+
+Browsers not supported: Safari
+
 # Stacks Architecture
 
 ![architecture](/readmeImg/architecture.png)
