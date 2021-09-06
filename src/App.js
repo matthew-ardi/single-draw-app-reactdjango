@@ -38,6 +38,8 @@ import qs from "qs";
 import GestureIcon from "@material-ui/icons/Gesture";
 import MouseIcon from "@material-ui/icons/Mouse";
 import PermMediaIcon from "@material-ui/icons/PermMedia";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import Divider from "@material-ui/core/Divider";
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -261,13 +263,24 @@ const App = () => {
   const navigationClasses = navigationUseStyles();
   const [value, setValue] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null); //Simple Menu
+  const [savedDrawingMenu, setSavedDrawingMenu] = useState(false);
   // Simple Menu
-  const handleMenuClick = (event) => {
+  const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
+    setSavedDrawingMenu(true);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSavedDrawingMenu(false);
+  };
+
+  const handleMenuOpenOnly = () => {
+    setSavedDrawingMenu(true);
+  };
+
+  const handleMenuCloseOnly = () => {
+    setSavedDrawingMenu(false);
   };
 
   // modal
@@ -459,6 +472,57 @@ const App = () => {
   // function getSavedElementsAsync(authKey) {
   //   getSavedElements();
   // }
+  function deleteSavedElements(saveId) {
+    const authToken = "Token " + loginStateKey;
+    console.log(saveId);
+    return axios
+      .get("/api/drawings", {
+        headers: { Authorization: authToken },
+        params: {
+          saveId: saveId,
+        },
+      })
+      .then(function (response) {
+        console.log("get response below:");
+        console.log(response.data);
+        return response.data;
+      })
+      .then(function (data) {
+        let rowId = data[0].id;
+        console.log("Deleting row with following id: ");
+        console.log(rowId);
+        console.log("authToken below: ");
+        console.log(authToken);
+        return axios({
+          method: "delete",
+          url: "/api/drawings/" + rowId.toString(),
+          headers: { Authorization: authToken },
+        })
+          .then(function (response) {
+            const copiedSavedElements = savedElements;
+            console.log("copied saved elements:");
+            console.log(copiedSavedElements);
+            copiedSavedElements.splice(saveId, 1);
+            console.log("after splice:");
+            console.log(copiedSavedElements);
+            return copiedSavedElements;
+            // savedElements.splice(saveId, 1);
+            return;
+          })
+          .then(function (newSavedElements) {
+            setSavedElements(newSavedElements);
+          })
+          .then(function () {
+            handleMenuCloseOnly();
+          })
+          .then(function () {
+            handleMenuOpenOnly();
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      });
+  }
   function getSavedElements(authKey) {
     const authToken = "Token " + authKey;
 
@@ -561,9 +625,31 @@ const App = () => {
     openDrawing(saveId);
   }
   const savedItemsMenu = savedElements.map((item, index) => (
-    <MenuItem onClick={onClickOpenDrawing.bind(this, item[0])} value={item[0]}>
-      {item[1]}
-    </MenuItem>
+    <Grid
+      container
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Grid item xs={9}>
+        <MenuItem
+          onClick={onClickOpenDrawing.bind(this, item[0])}
+          value={item[0]}
+        >
+          {item[1]}
+        </MenuItem>
+      </Grid>
+      <Grid item>
+        <IconButton
+          edge="start"
+          className={navbarClasses.menuButton}
+          color="inherit"
+          onClick={deleteSavedElements.bind(this, item[0])}
+        >
+          <DeleteForeverIcon />
+        </IconButton>
+      </Grid>
+    </Grid>
   ));
   const savedItems = savedElements.map((item, index) => (
     <div>
@@ -929,22 +1015,24 @@ const App = () => {
               className={navbarClasses.menuButton}
               color="inherit"
               aria-label="menu"
-              onClick={handleMenuClick}
+              onClick={handleMenuOpen}
             >
               <PermMediaIcon />
             </IconButton>
             <Menu
-              id="simple-menu"
+              id="fade-menu"
               anchorEl={anchorEl}
               keepMounted
-              open={Boolean(anchorEl)}
+              open={savedDrawingMenu}
               onClose={handleMenuClose}
             >
-              <div>
-                <text style={{ fontWeight: "bold" }}>Your Saved Drawings</text>
-                {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-                <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Logout</MenuItem> */}
+              <div style={{ align: "center" }}>
+                <text style={{ fontWeight: "bold", paddingRight: 30 }}>
+                  <PermMediaIcon
+                    style={{ paddingLeft: 10, paddingRight: 10 }}
+                  />
+                  My Saved Drawings
+                </text>
                 {savedItemsMenu}
               </div>
             </Menu>
