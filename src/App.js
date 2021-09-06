@@ -239,11 +239,19 @@ const getElementAtPosition = (x, y, elements) => {
 // export const [loginStateKey, setLoginStateKey] = useState(null);
 const App = () => {
   const [elements, setElements] = useState([]);
+  //   () => {
+  //   const localElements = localStorage.getItem("elements");
+  //   console.log(localElements);
+  //   return localElements !== null ? localElements : [];
+  // });
   const [action, setAction] = useState("none");
   const [tool, setTool] = useState("Move");
   const [selectedElement, setSelectedElement] = useState(null);
   const [selectModeElements, setSelectModeElements] = useState([]);
-  const [savedElements, setSavedElements] = useState([]); // [[saveId, saveName, [cornersObject]]]
+  const [savedElements, setSavedElements] = useState(() => {
+    const localSavedElements = localStorage.getItem("savedElements");
+    return localSavedElements !== null ? JSON.parse(localSavedElements) : [];
+  }); // [[saveId, saveName, [cornersObject]]]
   const [drawingName, setDrawingName] = useState(null);
   const [editDrawing, setEditDrawing] = useState(null);
   const [getSaved, setGetSaved] = useState([]); // {saveId, saveName, corners, username}
@@ -422,6 +430,7 @@ const App = () => {
 
     setUserPk(null);
     setSavedElements([]);
+    localStorage.removeItem("savedElements");
     clearElements();
   }
 
@@ -456,6 +465,7 @@ const App = () => {
         manualSavedRetrieval(parsedSavedElements);
         return;
       })
+
       // .then(function (response) {
       //   console.log(response);
       //   console.log(loginStateKey);
@@ -511,6 +521,10 @@ const App = () => {
           })
           .then(function (newSavedElements) {
             setSavedElements(newSavedElements);
+            localStorage.setItem(
+              "savedElements",
+              JSON.stringify(newSavedElements)
+            );
           })
           .then(function () {
             handleMenuCloseOnly();
@@ -577,6 +591,7 @@ const App = () => {
       ...prevState,
       [drawingIndex, drawName, mainElements, dbId],
     ]);
+    savedDrawingLocallyWithDbId(drawingIndex, drawName, mainElements, dbId);
     setElements([]);
   }
 
@@ -600,6 +615,7 @@ const App = () => {
       let corners = JSON.parse(item[1]);
       console.log(corners);
       loadDrawing(tempDrawingName, corners, saveIndex, dbId);
+      // localStorage.setItem("savedElements", JSON.stringify(savedElements));
     });
   }
 
@@ -616,6 +632,7 @@ const App = () => {
     // const saveId = event.target.value;
     // console.log(saveId);
     setElements(retrievedElement[2]);
+    localStorage.setItem("elements", retrievedElement[2]);
     setSelectedElement(null);
     setEditDrawing(saveId);
   }
@@ -715,6 +732,34 @@ const App = () => {
     setDrawingName(event.target.value);
   }
 
+  function savedDrawingLocally(drawingIndex, drawingName, elements) {
+    let saveLocal;
+    if (savedElements.length === 0) {
+      saveLocal = [[drawingIndex, drawingName, elements]];
+    } else {
+      saveLocal = savedElements.concat([[drawingIndex, drawingName, elements]]);
+    }
+
+    localStorage.setItem("savedElements", JSON.stringify(saveLocal));
+  }
+
+  function savedDrawingLocallyWithDbId(
+    drawingIndex,
+    drawingName,
+    elements,
+    dbId
+  ) {
+    let saveLocal;
+    if (localStorage.getItem("savedElements") === null) {
+      saveLocal = [[drawingIndex, drawingName, elements, dbId]];
+    } else {
+      saveLocal = JSON.parse(localStorage.getItem("savedElements")).concat([
+        [drawingIndex, drawingName, elements, dbId],
+      ]);
+    }
+    localStorage.setItem("savedElements", JSON.stringify(saveLocal));
+  }
+
   function saveDrawings(event) {
     event.preventDefault();
     const drawingIndex = savedElements.length;
@@ -723,6 +768,7 @@ const App = () => {
         ...prevState,
         [drawingIndex, drawingName, elements],
       ]);
+
       if (auth) {
         let elementsOutput = JSON.stringify(
           elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
@@ -745,16 +791,28 @@ const App = () => {
         })
           .then(function (response) {
             console.log(response.data);
+            let rowId = response.data.id;
+            savedDrawingLocallyWithDbId(
+              drawingIndex,
+              drawingName,
+              elements,
+              rowId
+            );
           })
           .catch(function (error) {
             console.log(error);
           });
+      } else {
+        savedDrawingLocally(drawingIndex, drawingName, elements);
       }
     } else if (elements && editDrawing !== null) {
       const saveId = editDrawing;
       savedElements[saveId][2] = elements;
       let index = savedElements[saveId][0];
       let drawName = savedElements[saveId][1];
+      let currentLocalSave = JSON.parse(localStorage.getItem("savedElements"));
+      currentLocalSave[saveId] = [index, drawName, elements];
+      localStorage.setItem("savedElements", JSON.stringify(currentLocalSave));
       if (auth) {
         let dbId = savedElements[saveId][3];
         const authToken = "Token " + loginStateKey;
@@ -781,6 +839,7 @@ const App = () => {
 
   function clearElements() {
     setElements([]);
+    localStorage.setItem("elements", []);
     setSelectedElement([]);
     setEditDrawing(null);
   }
@@ -822,6 +881,7 @@ const App = () => {
     const elementsCopy = [...elements];
     elementsCopy[id] = updatedElement;
     setElements(elementsCopy);
+    localStorage.setItem("elements", elementsCopy);
   };
 
   const updateSelectElement = (id, x1, y1, clientX, clientY) => {
@@ -919,6 +979,7 @@ const App = () => {
         ""
       );
       setElements((prevState) => [...prevState, element]);
+      localStorage.setItem("elements", (prevState) => [...prevState, element]);
       setSelectedElement(element);
     }
   };
