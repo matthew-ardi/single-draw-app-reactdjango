@@ -484,7 +484,6 @@ const App = () => {
   // }
   function deleteSavedElements(saveId) {
     const authToken = "Token " + loginStateKey;
-    console.log(saveId);
     return axios
       .get("/api/drawings", {
         headers: { Authorization: authToken },
@@ -515,7 +514,7 @@ const App = () => {
             copiedSavedElements.splice(saveId, 1);
             console.log("after splice:");
             console.log(copiedSavedElements);
-            return copiedSavedElements;
+            return postDeleteIndexFix(copiedSavedElements);
             // savedElements.splice(saveId, 1);
             return;
           })
@@ -536,6 +535,37 @@ const App = () => {
             console.log(error);
           });
       });
+  }
+  function postDeleteIndexFix(elementsArray) {
+    let res = elementsArray;
+    res.forEach((drawings, index) => {
+      if (drawings[0] !== index) {
+        let dbId = drawings[3];
+        let drawName = drawings[1];
+        const authToken = "Token " + loginStateKey;
+        let elementsOutput = JSON.stringify(
+          drawings[2].map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
+        );
+        axios({
+          method: "put",
+          url: "/api/drawings/" + dbId,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authToken,
+          },
+          data: {
+            username: userPk,
+            saveId: index,
+            saveName: drawName,
+            corners: elementsOutput,
+          },
+        });
+        drawings[0] = index;
+      }
+    });
+    console.log("Fixed array below");
+    console.log(res);
+    return res;
   }
   function getSavedElements(authKey) {
     const authToken = "Token " + authKey;
@@ -764,11 +794,6 @@ const App = () => {
     event.preventDefault();
     const drawingIndex = savedElements.length;
     if (elements) {
-      setSavedElements((prevState) => [
-        ...prevState,
-        [drawingIndex, drawingName, elements],
-      ]);
-
       if (auth) {
         let elementsOutput = JSON.stringify(
           elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
@@ -798,6 +823,10 @@ const App = () => {
               elements,
               rowId
             );
+            setSavedElements((prevState) => [
+              ...prevState,
+              [drawingIndex, drawingName, elements, rowId],
+            ]);
           })
           .catch(function (error) {
             console.log(error);
@@ -806,36 +835,6 @@ const App = () => {
         savedDrawingLocally(drawingIndex, drawingName, elements);
       }
     }
-    // else if (elements && editDrawing !== null) {
-    //   const saveId = editDrawing;
-    //   savedElements[saveId][2] = elements;
-    //   let index = savedElements[saveId][0];
-    //   let drawName = savedElements[saveId][1];
-    //   let currentLocalSave = JSON.parse(localStorage.getItem("savedElements"));
-    //   currentLocalSave[saveId] = [index, drawName, elements];
-    //   localStorage.setItem("savedElements", JSON.stringify(currentLocalSave));
-    //   if (auth) {
-    //     let dbId = savedElements[saveId][3];
-    //     const authToken = "Token " + loginStateKey;
-    //     let elementsOutput = JSON.stringify(
-    //       elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
-    //     );
-    //     axios({
-    //       method: "put",
-    //       url: "/api/drawings/" + dbId,
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: authToken,
-    //       },
-    //       data: {
-    //         username: userPk,
-    //         saveId: index,
-    //         saveName: drawName,
-    //         corners: elementsOutput,
-    //       },
-    //     });
-    //   }
-    // }
   }
 
   function saveEdit(event) {
@@ -843,9 +842,11 @@ const App = () => {
     const drawingIndex = savedElements.length;
     if (elements && editDrawing !== null) {
       const saveId = editDrawing;
-      savedElements[saveId][2] = elements;
+      let copiedSavedElements = savedElements;
+      copiedSavedElements[saveId][2] = elements;
       let index = savedElements[saveId][0];
       let drawName = savedElements[saveId][1];
+      setSavedElements(copiedSavedElements);
       let currentLocalSave = JSON.parse(localStorage.getItem("savedElements"));
       currentLocalSave[saveId] = [index, drawName, elements];
       localStorage.setItem("savedElements", JSON.stringify(currentLocalSave));
