@@ -694,7 +694,7 @@ const App = () => {
           color="primary"
           type="Button"
           id="saveEdit"
-          onClick={saveDrawings}
+          onClick={saveEdit}
         >
           Save edit
           {/* Save {saveName} */}
@@ -763,7 +763,7 @@ const App = () => {
   function saveDrawings(event) {
     event.preventDefault();
     const drawingIndex = savedElements.length;
-    if (elements && editDrawing === null) {
+    if (elements) {
       setSavedElements((prevState) => [
         ...prevState,
         [drawingIndex, drawingName, elements],
@@ -805,7 +805,43 @@ const App = () => {
       } else {
         savedDrawingLocally(drawingIndex, drawingName, elements);
       }
-    } else if (elements && editDrawing !== null) {
+    }
+    // else if (elements && editDrawing !== null) {
+    //   const saveId = editDrawing;
+    //   savedElements[saveId][2] = elements;
+    //   let index = savedElements[saveId][0];
+    //   let drawName = savedElements[saveId][1];
+    //   let currentLocalSave = JSON.parse(localStorage.getItem("savedElements"));
+    //   currentLocalSave[saveId] = [index, drawName, elements];
+    //   localStorage.setItem("savedElements", JSON.stringify(currentLocalSave));
+    //   if (auth) {
+    //     let dbId = savedElements[saveId][3];
+    //     const authToken = "Token " + loginStateKey;
+    //     let elementsOutput = JSON.stringify(
+    //       elements.map(({ id, x1, y1, x2, y2 }) => [id, x1, y1, x2, y2])
+    //     );
+    //     axios({
+    //       method: "put",
+    //       url: "/api/drawings/" + dbId,
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: authToken,
+    //       },
+    //       data: {
+    //         username: userPk,
+    //         saveId: index,
+    //         saveName: drawName,
+    //         corners: elementsOutput,
+    //       },
+    //     });
+    //   }
+    // }
+  }
+
+  function saveEdit(event) {
+    event.preventDefault();
+    const drawingIndex = savedElements.length;
+    if (elements && editDrawing !== null) {
       const saveId = editDrawing;
       savedElements[saveId][2] = elements;
       let index = savedElements[saveId][0];
