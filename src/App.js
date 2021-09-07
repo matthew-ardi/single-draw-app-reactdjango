@@ -278,6 +278,8 @@ const App = () => {
   const [signUpEmailError, setSignUpEmailError] = useState(null);
   const [pass1Error, setPass1Error] = useState(null);
   const [pass2Error, setPass2Error] = useState(null);
+  const [loginEmailError, setLoginEmailError] = useState(null);
+  const [loginPassError, setLoginPassError] = useState(null);
 
   // Simple Menu
   const handleMenuOpen = (event) => {
@@ -464,18 +466,20 @@ const App = () => {
         console.log("parsedSavedElements: ");
         console.log(parsedSavedElements);
         manualSavedRetrieval(parsedSavedElements);
+        setLoginEmailError(null);
+        setLoginPassError(null);
         return;
       })
-
-      // .then(function (response) {
-      //   console.log(response);
-      //   console.log(loginStateKey);
-      //   let dataInput = response.data;
-      //   let userAuthKey = dataInput.key;
-      //   getSavedElements(userAuthKey);
-      // })
       .catch(function (error) {
+        setLoginEmailError(error.response.data.email);
+        setLoginPassError(error.response.data.password);
         console.log(error);
+
+        if (error.response.data.non_field_errors) {
+          setLoginEmailError(error.response.data.non_field_errors);
+          setLoginPassError(error.response.data.non_field_errors);
+        }
+        loginClickOpen();
       });
   }
 
@@ -1235,22 +1239,50 @@ const App = () => {
                     <DialogContentText>
                       To save your drawings, please Log in to your account
                     </DialogContentText>
-                    <TextField
-                      margin="dense"
-                      id="name"
-                      label="Email Address"
-                      type="email"
-                      fullWidth
-                      onChange={usernameChange}
-                    />
-                    <TextField
-                      margin="dense"
-                      id="password"
-                      label="Password"
-                      type="password"
-                      fullWidth
-                      onChange={passwordChange}
-                    />
+                    {loginEmailError && (
+                      <TextField
+                        error
+                        margin="dense"
+                        id="name"
+                        label="Email Address"
+                        type="email"
+                        fullWidth
+                        helperText={loginEmailError}
+                        onChange={usernameChange}
+                      />
+                    )}
+                    {!loginEmailError && (
+                      <TextField
+                        margin="dense"
+                        id="name"
+                        label="Email Address"
+                        type="email"
+                        fullWidth
+                        onChange={usernameChange}
+                      />
+                    )}
+                    {loginPassError && (
+                      <TextField
+                        error
+                        margin="dense"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        helperText={loginPassError}
+                        onChange={passwordChange}
+                      />
+                    )}
+                    {!loginPassError && (
+                      <TextField
+                        margin="dense"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        onChange={passwordChange}
+                      />
+                    )}
                   </DialogContent>
                   <DialogActions>
                     <Button onClick={loginClickClose} color="primary">
