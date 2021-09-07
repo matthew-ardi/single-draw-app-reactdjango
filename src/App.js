@@ -273,6 +273,12 @@ const App = () => {
   const [value, setValue] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null); //Simple Menu
   const [savedDrawingMenu, setSavedDrawingMenu] = useState(false);
+
+  // Auth Errors
+  const [signUpEmailError, setSignUpEmailError] = useState(null);
+  const [pass1Error, setPass1Error] = useState(null);
+  const [pass2Error, setPass2Error] = useState(null);
+
   // Simple Menu
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -313,19 +319,6 @@ const App = () => {
   const [anchorElProfile, setAnchorElProfile] = React.useState(null);
   const openProfile = Boolean(anchorElProfile);
 
-  // function fetchUserKey() {
-  //   // const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
-  //   // setLoginStateKey(userAuthKey.key);
-  //   setAuth(true);
-  // }
-
-  // if (loginStateKey !== null) {
-  //   setAuth(true);
-  //   setUsername(null);
-  //   setPassword(null);
-  //   setConfirmPassword(null);
-  // }
-
   const loginClickOpen = () => {
     setOpenLogin(true);
   };
@@ -343,7 +336,6 @@ const App = () => {
 
   const signupClickClose = () => {
     setOpenSignup(false);
-    setUsername(null);
     setPassword(null);
     setConfirmPassword(null);
   };
@@ -391,16 +383,27 @@ const App = () => {
         const userAuthKey = JSON.parse(localStorage.getItem("userKey"));
         setLoginStateKey(userAuthKey.key);
         setAuth(true);
+        setUsername(null);
+        setPass1Error(null);
+        setPass2Error(null);
+        setSignUpEmailError(null);
         return userAuthKey;
-        // setUsername(null);
-        // setPassword(null);
-        // setConfirmPassword(null);
       })
       .then(function (key) {
         updateUserPk(key);
       })
       .catch(function (error) {
-        console.log(error);
+        setPass1Error(error.response.data.password1);
+        setSignUpEmailError(error.response.data.email);
+        signupClickOpen();
+        if (error.response.data.non_field_errors) {
+          setPass1Error(error.response.data.non_field_errors);
+          setPass2Error(error.response.data.non_field_errors);
+          signupClickOpen();
+        }
+        console.log("error");
+        console.log(error.response);
+        console.log(error.response.data);
       });
   }
 
@@ -420,9 +423,6 @@ const App = () => {
         console.log(response.data);
         setLoginStateKey(null);
         setAuth(false);
-        // setUsername(null);
-        // setPassword(null);
-        // setConfirmPassword(null);
       })
       .catch(function (error) {
         localStorage.removeItem("userKey");
@@ -1279,30 +1279,75 @@ const App = () => {
                     <DialogContentText>
                       To save your drawings, please create an account
                     </DialogContentText>
-                    <TextField
-                      margin="dense"
-                      id="name"
-                      label="Email Address"
-                      type="email"
-                      fullWidth
-                      onChange={usernameChange}
-                    />
-                    <TextField
-                      margin="dense"
-                      id="password1"
-                      label="Password"
-                      type="password"
-                      fullWidth
-                      onChange={passwordChange}
-                    />
-                    <TextField
-                      margin="dense"
-                      id="password2"
-                      label="Confirm Password"
-                      type="password"
-                      fullWidth
-                      onChange={confirmPasswordChange}
-                    />
+                    {signUpEmailError && (
+                      <TextField
+                        error
+                        margin="dense"
+                        id="name"
+                        label="Email Address"
+                        type="email"
+                        fullWidth
+                        helperText={signUpEmailError}
+                        onChange={usernameChange}
+                      />
+                    )}
+                    {!signUpEmailError && (
+                      <TextField
+                        margin="dense"
+                        id="name"
+                        label="Email Address"
+                        type="email"
+                        fullWidth
+                        defaultValue={username}
+                        onChange={usernameChange}
+                      />
+                    )}
+
+                    {pass1Error && (
+                      <TextField
+                        error
+                        margin="dense"
+                        id="password1"
+                        label="Password"
+                        type="password"
+                        helperText={pass1Error}
+                        fullWidth
+                        onChange={passwordChange}
+                      />
+                    )}
+                    {!pass1Error && (
+                      <TextField
+                        margin="dense"
+                        id="password1"
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        onChange={passwordChange}
+                      />
+                    )}
+                    {pass2Error && (
+                      <TextField
+                        error
+                        margin="dense"
+                        id="password2"
+                        label="Confirm Password"
+                        type="password"
+                        fullWidth
+                        helperText={pass2Error}
+                        onChange={confirmPasswordChange}
+                      />
+                    )}
+                    {!pass2Error && (
+                      <TextField
+                        margin="dense"
+                        id="password2"
+                        label="Confirm Password"
+                        type="password"
+                        fullWidth
+                        defaultValue=""
+                        onChange={confirmPasswordChange}
+                      />
+                    )}
                   </DialogContent>
                   <DialogActions>
                     <Button onClick={signupClickClose} color="primary">
