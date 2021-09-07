@@ -108,6 +108,7 @@ const navigationUseStyles = makeStyles({
 });
 
 const textFieldUseStyles = makeStyles((theme) => ({
+  root: {},
   formField: {
     "& > *": {
       margin: theme.spacing(1),
@@ -1191,17 +1192,20 @@ const App = () => {
                 id="form"
                 noValidate
                 autoComplete="off"
-                className={textFieldClasses.root}
                 onSubmit={saveDrawings}
               >
                 {/* <label htmlFor="text">Drawing name: </label> */}
                 <TextField
-                  id="filled-disabled"
-                  label="File Name"
+                  id="standard-disabled"
+                  label="New Drawing Name"
                   variant="filled"
-                  InputPros={{
-                    className: textFieldClasses.input,
+                  className={textFieldClasses.root}
+                  InputLabelProps={{
+                    style: {
+                      color: "aliceblue",
+                    },
                   }}
+                  InputProps={{ style: { color: "aliceblue" } }}
                   value={drawingName}
                   onChange={handleInputChange}
                 />
